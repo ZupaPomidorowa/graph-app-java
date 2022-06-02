@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.canvas.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: white;" xmlns="http://javafx.com/javafx/16" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <Button layoutX="540.0" layoutY="25.0" mnemonicParsing="false" text="Save" />
+       <Button layoutX="482.0" layoutY="25.0" mnemonicParsing="false" text="Import" />
+       <Button fx:id="g1" layoutX="407.0" layoutY="25.0" mnemonicParsing="false" text="Generate" />
+       <CheckBox layoutX="358.0" layoutY="41.0" mnemonicParsing="false" />
+       <Label layoutX="333.0" layoutY="16.0" text="Connectivity" />
+       <TextField layoutX="270.0" layoutY="37.0" prefHeight="25.0" prefWidth="53.0" />
+       <Label layoutX="267.0" layoutY="16.0" text="Segments" />
+       <Label layoutX="178.0" layoutY="16.0" text="Weight" />
+       <Label layoutX="221.0" layoutY="16.0" text="range" />
+       <TextField layoutX="179.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
+       <TextField layoutX="110.0" layoutY="37.0" prefHeight="25.0" prefWidth="53.0" />
+       <TextField layoutX="37.0" layoutY="37.0" prefHeight="25.0" prefWidth="52.0" />
+       <Label layoutX="113.0" layoutY="16.0" text="Columns" />
+       <Label layoutX="49.0" layoutY="16.0" text="Rows" />
+       <TextField layoutX="220.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
+       <Label layoutX="34.0" layoutY="359.0" text="0" />
+       <Label layoutX="229.0" layoutY="359.0" text="10" />
+       <Label layoutX="102.0" layoutY="359.0" text="Weight scale" />
+      <ImageView fitHeight="150.0" fitWidth="200.0" layoutX="37.0" layoutY="336.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@icons/colours.png" />
+         </image>
+      </ImageView>
+      <Canvas fx:id="cw1" height="232.0" layoutX="37.0" layoutY="87.0" width="496.0" />
+      <ScrollBar layoutX="29.0" layoutY="319.0" prefHeight="15.0" prefWidth="509.0" />
+   </children>
+</AnchorPane>
