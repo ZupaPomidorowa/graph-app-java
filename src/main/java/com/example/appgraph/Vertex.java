@@ -40,13 +40,22 @@ public class Vertex {
         return (neighbour[position] != -1);
     }
 
+    public int countNeighbours() {
+        int count = 0;
+        for(int i = 0; i < 4; i++) {
+            if(neighbour[i] != -1) {
+                count++;
+            }
+        }
+        return count;
+    }
     public double getWeight(int position) {
         return weight[position];
     }
 
     @Override
     public String toString() {
-        String str = null;
+        String str = "";
         for(int i = 0; i < 4; i++) {
             if(neighbour[i] != -1) {
                 str = str + neighbour[i] + " :" + weight[i] + " ";
