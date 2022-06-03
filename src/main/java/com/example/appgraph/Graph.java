@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Graph implements GeneratedGraph, ReadGraph {
@@ -49,7 +50,9 @@ public class Graph implements GeneratedGraph, ReadGraph {
         return weightLower + (weightUpper - weightLower) * r.nextDouble();
     }
 
-    //
+    private int getRandomVertex() {
+        return r.nextInt(getGraphSize());
+    }
     @Override
     public  int getRows() {return  rows;}
 
@@ -102,9 +105,72 @@ public class Graph implements GeneratedGraph, ReadGraph {
         }
     }
 
+
     @Override
     public void splitGraph() {
-        // to be implemented
+        int startVertex = 0, finishVertex = 0;
+        int countEdges;
+        boolean isConnected = false;
+
+        // pick 2 random connected vertices with 3 edges that aren't in the same row or column
+        while(!isConnected) {
+            do {
+                startVertex = getRandomVertex();
+                if((countEdges = v[startVertex].countNeighbours()) != 3) {
+                    continue;
+                }
+
+                finishVertex = getRandomVertex();
+                if((countEdges = v[finishVertex].countNeighbours()) != 3) {
+                    continue;
+                }
+            } while (countEdges != 3 ||
+                    getCurrentRow(startVertex) == getCurrentRow(finishVertex)
+                    || getCurrentColumn(startVertex) == getCurrentColumn(finishVertex));
+
+            Connectivity bfs = new Connectivity(this);
+            isConnected = bfs.isConnected(this, startVertex, finishVertex);
+        }
+
+        // find the shortest path between the 2 vertices
+        Path dijkstry = new Path(this);
+        ArrayList<Integer> path = dijkstry.findPath(this, startVertex, finishVertex);
+        // for all vertices from the path, cut all right and bottom edges
+        for(int i = (path.size() - 1); i > 0; i--) {
+            int currentVertex = path.get(i);
+            v[currentVertex].removeNeighbour(Vertex.RIGHT);
+            if((currentVertex + 1) < getGraphSize()) {
+                v[currentVertex + 1].removeNeighbour(1);
+            }
+            v[currentVertex].removeNeighbour(3);
+            if((currentVertex + columns) < getGraphSize()) {
+                v[currentVertex + columns].removeNeighbour(0);
+            }
+        }
+
+        // for all vertices that became entirely disconnected, restore 1 possible edge
+        double w = 0;
+        for(int i = 0; i < getGraphSize(); i++) {
+            if(v[i].countNeighbours() == 0) {
+                if(getCurrentRow(i) != 0) {
+                    w = getRandomWeight();
+                    v[i].setNeighbour(Vertex.UPPER, (i - columns), w);
+                    v[i - columns].setNeighbour(Vertex.LOWER, i, w);
+                } else if(getCurrentColumn(i) != 0) {
+                    w = getRandomWeight();
+                    v[i].setNeighbour(Vertex.LEFT, (i - 1), w);
+                    v[i - 1].setNeighbour(Vertex.RIGHT, i, w);
+                } else if(getCurrentColumn(i) != (columns - 1)) {
+                    w = getRandomWeight();
+                    v[i].setNeighbour(Vertex.RIGHT, (i + 1), w);
+                    v[i + 1].setNeighbour(Vertex.LEFT, i, w);
+                }
+                else if(getCurrentRow(i) != (rows - 1)) {
+                    v[i].setNeighbour(Vertex.LOWER, (i + columns), w);
+                    v[i + columns].setNeighbour(Vertex.UPPER, i, w);
+                }
+            }
+        }
     }
 
     @Override

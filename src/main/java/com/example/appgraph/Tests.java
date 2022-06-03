@@ -6,18 +6,26 @@ import java.util.ArrayList;
 public class Tests {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         // random graph generation test
-        /*GeneratedGraph gg = new Graph(3, 4, 0, 10);
+        GeneratedGraph gg = new Graph(3, 4, 0, 10);
         gg.generateGraph();
         gg.printGraph();
-        Connectivity bfs = new Connectivity((Graph) gg);
-        if(bfs.isConnected((Graph) gg)) {
+        Connectivity bfsBefore = new Connectivity((Graph) gg);
+        if(bfsBefore.isConnected((Graph) gg)) {
             System.out.println("The graph is connected.");
         } else {
             System.out.println("The graph is disconnected.");
-        }*/
+        }
+        gg.splitGraph();
+        gg.printGraph();
+        Connectivity bfsAfter = new Connectivity((Graph) gg);
+        if(bfsAfter.isConnected((Graph) gg)) {
+            System.out.println("The graph is connected.");
+        } else {
+            System.out.println("The graph is disconnected.");
+        }
 
         // graph file reading
-        ReadGraph rg = new Graph();
+        /*ReadGraph rg = new Graph();
         try {
             FileReader reader = new FileReader("graph.txt");
             rg.readGraph(reader);
@@ -46,6 +54,6 @@ public class Tests {
                 System.out.print(path.get(i) + "-");
             }
             System.out.println(path.get(0) + ".");
-        }
+        }*/
     }
 }
