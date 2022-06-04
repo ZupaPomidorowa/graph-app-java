@@ -15,9 +15,12 @@ public interface GeneratedGraph {
 
     void printGraph();
 
-    //
     int getRows();
 
     int getColumns();
+
+    double getWeightLower();
+
+    double getWeightUpper();
 
 }

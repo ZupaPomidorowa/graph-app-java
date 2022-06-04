@@ -54,11 +54,24 @@ public class Graph implements GeneratedGraph, ReadGraph {
         return r.nextInt(getGraphSize());
     }
     @Override
-    public  int getRows() {return  rows;}
+    public int getRows() {
+        return rows;
+    }
 
     @Override
-    public int getColumns() {return columns;}
+    public int getColumns() {
+        return columns;
+    }
 
+    @Override
+    public double getWeightLower() {
+        return weightLower;
+    }
+
+    @Override
+    public double getWeightUpper() {
+        return weightUpper;
+    }
     @Override
     public Vertex getVertex(int index) {
         return v[index];
