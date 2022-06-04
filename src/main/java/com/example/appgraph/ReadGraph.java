@@ -14,4 +14,8 @@ public interface ReadGraph {
     void writeGraph(PrintWriter writer);
 
     void printGraph();
+
+    int getRows();
+
+    int getColumns();
 }

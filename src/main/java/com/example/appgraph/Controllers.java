@@ -3,7 +3,6 @@ package com.example.appgraph;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Group;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.stage.FileChooser;
@@ -13,26 +12,20 @@ import javafx.scene.paint.Color;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 
+import java.util.regex.*;
 
-import java.io.File;
-import java.io.IOException;
+
+import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
 
 public class Controllers implements Initializable {
     GeneratedGraph gg;
+    ReadGraph rg;
     FileChooser fileChooser = new FileChooser();
     private GraphicsContext gc;
-
-    @FXML
-    void importFile(ActionEvent event) {
-        File file = fileChooser.showOpenDialog(new Stage());
-        //graph = new GraphReader(file.getAbsolutePath()).readGraph(); //czytanie grafu z pliku
-        //graph.printGraph(graph);   wypisanie grafu test
-    }
 
     @FXML
     private Canvas cw1 = new Canvas(610,610);
@@ -49,119 +42,180 @@ public class Controllers implements Initializable {
     @FXML
     private TextField columnsField;
 
-   @FXML
+    @FXML
+    private CheckBox checkConnect;
+
+    @FXML
+    private Label myLabel;
+
+    @FXML
     void generate(ActionEvent event) throws IOException {
-       int rows = parseInt(rowsField.getText());
-       int columns = parseInt(columnsField.getText());
-       int w1 = parseInt(min.getText());
-       int w2 = parseInt(max.getText());
+        int rows = parseInt(rowsField.getText());
+        int columns = parseInt(columnsField.getText());
+        int w1 = parseInt(min.getText());
+        int w2 = parseInt(max.getText());
 
-       gg = new Graph(rows, columns, w1, w2);
-       gg.generateGraph();
+        gg = new Graph(rows, columns, w1, w2);
+        gg.generateGraph();
 
-       /*tests*/
-       System.out.println(rows);
-       System.out.println(columns);
-       System.out.println(w1);
-       System.out.println(w2);
+        //test - printing rows, columns, w1, w2
+        System.out.println("Rows " + rows);
+        System.out.println("Columns " + columns);
+        System.out.println("w1 " + w1);
+        System.out.println("w2 " + w2);
 
-       gg.printGraph();
+        gg.printGraph();
 
-       System.out.println("Start draw Graph");
-       drawGraph();
-       System.out.println("End draw Graph");
-
-
-  }
-
-    @Override
-    public void initialize(URL url, ResourceBundle resourceBundle) {
-        fileChooser.setInitialDirectory(new File("D:\\"));
+        drawGraph();
     }
 
     @FXML
-    void connectivity (ActionEvent event) {
-       //co tutaj zrobic ?? zaznaczanie zmienic na przycisk ???
+    void importFile(ActionEvent event) {
+        File selectedFile = fileChooser.showOpenDialog(null);
+
+        System.out.println(selectedFile.getAbsolutePath());
+
+        rg = new Graph();
+
+        try {
+            FileReader reader = new FileReader(selectedFile.getAbsolutePath());
+            rg.readGraph(reader);
+        } catch (IOException e) {
+            System.out.println("Incorrect file format." + e);
+        }
+
+        //test - printing imported graph
+        rg.printGraph();
+
+        drawGraph2();
+
+    }
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        fileChooser.setInitialDirectory(new File("C:\\"));
+    }
+
+
+    @FXML
+    void change (ActionEvent event) {    //check box connectivity
+        if (checkConnect.isSelected()) {
+            Connectivity bfs = new Connectivity((Graph) gg);
+            if(bfs.isConnected((Graph) gg)) {
+                myLabel.setText("The graph is connected.");
+                System.out.println("The graph is connected.");
+            } else {
+                myLabel.setText("The graph is disconnected.");
+                System.out.println("The graph is disconnected.");
+            }
+
+        }
+        else {
+            myLabel.setText("");
+        }
+
     }
 
 
     public void drawGraph () {
-       //Group root = new Group();
         gc = cw1.getGraphicsContext2D();
         gc.setFill(Color.valueOf("blue"));
         gc.clearRect(0,0, cw1.getWidth(),cw1.getHeight());
 
         double width = cw1.getWidth();
         double height = cw1.getHeight();
-        double right = width/(gg.getColumns()); //-1
-        double down = height/(gg.getRows());  //-1
+        double right = width/(gg.getColumns());  //intervals horizontal
+        double down = height/(gg.getRows());     //intervals vertical
+        double r = height/(2*gg.getRows()-1);    // r = 2*radius
 
-        System.out.println(gg.getRows());
-        System.out.println(gg.getColumns());
-        System.out.println(right);
-        System.out.println(down);
+        //test - rows, columns, intervals horizontal (right), intervals vertical (down), r
+        System.out.println("Rows " + gg.getRows());
+        System.out.println("Columns " + gg.getColumns());
+        System.out.println("Intervals horizontal (right) " + right);
+        System.out.println("Intervals vertical (down) " + down);
+        System.out.println("r " + r);
 
-        //double r = 0.8*Math.sqrt(width*height/2*Math.PI* gg.getGraphSize());
-        //double r = 20;
-        double r = height/(2*gg.getRows()-1);
-
-        System.out.println("r: " + r);
-
+        //draw nodes
         for(int i =0; i<gg.getRows()+1; i++){
             for (int j = 0; j<gg.getColumns()+1; j++) {
                 gc.fillOval(right*j, down*i, r, r);
             }
         }
 
-
-
+        //draw edges horizontal
         for (int i = 0; i <gg.getRows() ; i++) {
             for (int j = 0; j < gg.getColumns() - 1; j++) {
                 gc.fillRect(0.5 * r + right * j, 0.5 * r + down * i, right, r * 0.1);
             }
         }
 
+        //draw edges vertical
         for (int j = 0; j<gg.getColumns(); j++) {
             for (int i = 0; i < gg.getRows() - 1; i++) {
                 gc.fillRect(0.45 * r + right * j, 0.5 * r + down * i, r * 0.1, down);
             }
         }
 
+    }
 
+    void drawGraph2() {
+        gc = cw1.getGraphicsContext2D();
+        gc.setFill(Color.valueOf("blue"));
+        gc.clearRect(0,0, cw1.getWidth(),cw1.getHeight());
 
+        double width = cw1.getWidth();
+        double height = cw1.getHeight();
+        double right = width/(rg.getColumns()); //intervals horizontal
+        double down = height/(rg.getRows());    //intervals vertical
+        double r = height/(2*rg.getRows()-1);   //r = 2*radius
 
+        //test - rows, columns, intervals horizontal (right), intervals vertical (down), r
+        System.out.println("Rows " + rg.getRows());
+        System.out.println("Columns " + rg.getColumns());
+        System.out.println("Intervals horizontal (right) " + right);
+        System.out.println("Intervals vertical (down) " + down);
+        System.out.println("r " + r);
 
-
-
-        /*
-        for (int i = 0; i<gg.getColumns()-1; i++) {
-            gc.fillRect(0.5*r, 0.5*r+down*i, down, r*0.1);
-        }
-
-         */
-
-
-
-
-        /*
-        for(int i = 0; i < gg.getRows(); i++) {
-            for (int j = 0; j < gg.getColumns()-1; j++) {
-
-                gc.fillRect(right*j*r*0.5, down*i*r*0.5, right, r*0.25);
+        //draw nodes
+        for(int i =0; i<rg.getRows()+1; i++) {
+            for (int j = 0; j < rg.getColumns() + 1; j++) {
+                gc.fillOval(right * j, down * i, r, r);
             }
         }
 
-         */
+        //draw edges horizontal
+        for (int i = 0; i <rg.getRows() ; i++) {
+            for (int j = 0; j < rg.getColumns() - 1; j++) {
+                gc.fillRect(0.5 * r + right * j, 0.5 * r + down * i, right, r * 0.1);
+            }
+        }
 
-        //root.getChildren().add(cw1);
+        //draw edges vertical
+        for (int j = 0; j<rg.getColumns(); j++) {
+            for (int i = 0; i < rg.getRows() - 1; i++) {
+                gc.fillRect(0.45 * r + right * j, 0.5 * r + down * i, r * 0.1, down);
+            }
+        }
 
     }
 
-    public void clearCanva () {
-       //funkcja czyszczaca kanwe
-    }
 
-    // funkcja zaznaczajaca wierzcholki
+    @FXML
+    public void saveGraph (ActionEvent event) throws FileNotFoundException, UnsupportedEncodingException {
+        File selectedFile = fileChooser.showSaveDialog(null);
+
+        //test - print path to file
+        System.out.println(selectedFile.getAbsolutePath());
+
+        String value = selectedFile.getAbsolutePath();
+        PrintWriter writer = new PrintWriter(value, "UTF-8");
+        gg.writeGraph(writer);
+
+        //test - print graph wrote to the file
+        gg.printGraph();
+
+
+    }
 
 
 }
