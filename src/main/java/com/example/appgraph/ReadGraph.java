@@ -18,4 +18,9 @@ public interface ReadGraph {
     int getRows();
 
     int getColumns();
+
+    double getWeightLower();
+
+    double getWeightUpper();
+
 }

@@ -1,34 +1,23 @@
 package com.example.appgraph;
 
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.stage.FileChooser;
-
 import javafx.scene.paint.Color;
-
 import javafx.scene.control.*;
-import javafx.stage.Stage;
-
-import java.util.regex.*;
-
-
 import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
 
 public class Controllers implements Initializable {
-    GeneratedGraph gg;
-    ReadGraph rg;
-    FileChooser fileChooser = new FileChooser();
-    private GraphicsContext gc;
 
     @FXML
-    private Canvas cw1 = new Canvas(610,610);
+    private ScrollPane scrollPane = new ScrollPane();
 
     @FXML
     private TextField min;
@@ -43,165 +32,142 @@ public class Controllers implements Initializable {
     private TextField columnsField;
 
     @FXML
-    private CheckBox checkConnect;
+    private TextField segmentsField;
 
     @FXML
-    private Label myLabel;
+    private Button saveFile;
 
     @FXML
-    void generate(ActionEvent event) throws IOException {
-        int rows = parseInt(rowsField.getText());
-        int columns = parseInt(columnsField.getText());
-        int w1 = parseInt(min.getText());
-        int w2 = parseInt(max.getText());
+    private Button checkConnectivity;
 
-        gg = new Graph(rows, columns, w1, w2);
-        gg.generateGraph();
+    @FXML
+    private Label connectivityInfo;
 
-        //test - printing rows, columns, w1, w2
-        System.out.println("Rows " + rows);
-        System.out.println("Columns " + columns);
-        System.out.println("w1 " + w1);
-        System.out.println("w2 " + w2);
+    @FXML
+    private Label weightLowerLabel;
 
-        gg.printGraph();
+    @FXML
+    private Label weightUpperLabel;
 
-        drawGraph();
+    GeneratedGraph gg;
+    ReadGraph rg;
+    FileChooser fileChooser = new FileChooser();
+
+    private static final double BLUE = Color.DARKBLUE.getHue();
+    private static final double RED = Color.RED.getHue();
+
+    private static final int POINT_SIZE = 20;
+    private static final int EDGE_LENGTH = 20;
+    private static final int EDGE_THICKNESS = 5;
+    private static final int PADDING = 20;
+
+    @FXML
+    void generate() {
+        try {
+            int rows = parseInt(rowsField.getText());
+            int columns = parseInt(columnsField.getText());
+            double w1 = parseDouble(min.getText());
+            double w2 = parseDouble(max.getText());
+            int segments = parseInt(segmentsField.getText());
+
+            if (rows * columns > 10000 || w1 >= w2 || w1 <= 0.0 || w2 >= 100.0 || segments <= 0 || segments > 10) {
+                throw new IllegalArgumentException();
+            }
+
+            gg = new Graph(rows, columns, w1, w2);
+            gg.generateGraph();
+
+            //test - printing rows, columns, w1, w2
+            System.out.println("Rows " + rows);
+            System.out.println("Columns " + columns);
+            System.out.println("w1 " + w1);
+            System.out.println("w2 " + w2);
+
+            gg.printGraph();
+
+            updateWeightLabels((Graph) gg);
+            drawGraph((Graph) gg);
+            saveFile.setDisable(false);
+            checkConnectivity.setDisable(false);
+            connectivityInfo.setText("");
+        } catch (NumberFormatException e) {
+            System.err.println("Incorrect argument format." + e);
+            Alert popUp = new Alert(Alert.AlertType.ERROR);
+            popUp.setTitle("Error");
+            popUp.setHeaderText("Incorrect argument format");
+            popUp.setContentText("Please provide arguments in the correct format.");
+            popUp.showAndWait();
+        } catch (IllegalArgumentException e) {
+            System.err.println("Arguments out of range." + e);
+            Alert popUp = new Alert(Alert.AlertType.ERROR);
+            popUp.setTitle("Error");
+            popUp.setHeaderText("Arguments out of range");
+            popUp.setContentText("Please provide arguments only in the allowed range.");
+            popUp.showAndWait();
+        }
     }
 
     @FXML
-    void importFile(ActionEvent event) {
+    void importFile() {
+        saveFile.setDisable(true);
         File selectedFile = fileChooser.showOpenDialog(null);
 
         System.out.println(selectedFile.getAbsolutePath());
 
+        gg = null;
         rg = new Graph();
 
         try {
             FileReader reader = new FileReader(selectedFile.getAbsolutePath());
             rg.readGraph(reader);
+            //test - printing imported graph
+            rg.printGraph();
+            updateWeightLabels((Graph) rg);
+            drawGraph((Graph) rg);
+            checkConnectivity.setDisable(false);
+            connectivityInfo.setText("");
         } catch (IOException e) {
-            System.out.println("Incorrect file format." + e);
+            rg = null;
+            System.err.println("Incorrect file format." + e);
+            Alert popUp = new Alert(Alert.AlertType.ERROR);
+            popUp.setTitle("Error");
+            popUp.setHeaderText("Incorrect file format");
+            popUp.setContentText("Please provide an input file formatted correctly.");
+            popUp.showAndWait();
         }
-
-        //test - printing imported graph
-        rg.printGraph();
-
-        drawGraph2();
-
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         fileChooser.setInitialDirectory(new File("C:\\"));
+        saveFile.setDisable(true);
+        checkConnectivity.setDisable(true);
     }
-
-
     @FXML
-    void change (ActionEvent event) {    //check box connectivity
-        if (checkConnect.isSelected()) {
+    void checkConnectivity() {    //check box connectivity
+        // NOT THE BEST SOLUTION - TO BE CHANGED!
+        if (gg != null) {
             Connectivity bfs = new Connectivity((Graph) gg);
-            if(bfs.isConnected((Graph) gg)) {
-                myLabel.setText("The graph is connected.");
+            if (bfs.isConnected((Graph) gg)) {
+                connectivityInfo.setText("The graph is connected.");
                 System.out.println("The graph is connected.");
             } else {
-                myLabel.setText("The graph is disconnected.");
+                connectivityInfo.setText("The graph is disconnected.");
                 System.out.println("The graph is disconnected.");
             }
-
+        } else {
+            Connectivity bfs = new Connectivity((Graph) rg);
+            if (bfs.isConnected((Graph) rg)) {
+                connectivityInfo.setText("The graph is connected.");
+                System.out.println("The graph is connected.");
+            } else {
+                connectivityInfo.setText("The graph is disconnected.");
+                System.out.println("The graph is disconnected.");
+            }
         }
-        else {
-            myLabel.setText("");
-        }
-
     }
-
-
-    public void drawGraph () {
-        gc = cw1.getGraphicsContext2D();
-        gc.setFill(Color.valueOf("blue"));
-        gc.clearRect(0,0, cw1.getWidth(),cw1.getHeight());
-
-        double width = cw1.getWidth();
-        double height = cw1.getHeight();
-        double right = width/(gg.getColumns());  //intervals horizontal
-        double down = height/(gg.getRows());     //intervals vertical
-        double r = height/(2*gg.getRows()-1);    // r = 2*radius
-
-        //test - rows, columns, intervals horizontal (right), intervals vertical (down), r
-        System.out.println("Rows " + gg.getRows());
-        System.out.println("Columns " + gg.getColumns());
-        System.out.println("Intervals horizontal (right) " + right);
-        System.out.println("Intervals vertical (down) " + down);
-        System.out.println("r " + r);
-
-        //draw nodes
-        for(int i =0; i<gg.getRows()+1; i++){
-            for (int j = 0; j<gg.getColumns()+1; j++) {
-                gc.fillOval(right*j, down*i, r, r);
-            }
-        }
-
-        //draw edges horizontal
-        for (int i = 0; i <gg.getRows() ; i++) {
-            for (int j = 0; j < gg.getColumns() - 1; j++) {
-                gc.fillRect(0.5 * r + right * j, 0.5 * r + down * i, right, r * 0.1);
-            }
-        }
-
-        //draw edges vertical
-        for (int j = 0; j<gg.getColumns(); j++) {
-            for (int i = 0; i < gg.getRows() - 1; i++) {
-                gc.fillRect(0.45 * r + right * j, 0.5 * r + down * i, r * 0.1, down);
-            }
-        }
-
-    }
-
-    void drawGraph2() {
-        gc = cw1.getGraphicsContext2D();
-        gc.setFill(Color.valueOf("blue"));
-        gc.clearRect(0,0, cw1.getWidth(),cw1.getHeight());
-
-        double width = cw1.getWidth();
-        double height = cw1.getHeight();
-        double right = width/(rg.getColumns()); //intervals horizontal
-        double down = height/(rg.getRows());    //intervals vertical
-        double r = height/(2*rg.getRows()-1);   //r = 2*radius
-
-        //test - rows, columns, intervals horizontal (right), intervals vertical (down), r
-        System.out.println("Rows " + rg.getRows());
-        System.out.println("Columns " + rg.getColumns());
-        System.out.println("Intervals horizontal (right) " + right);
-        System.out.println("Intervals vertical (down) " + down);
-        System.out.println("r " + r);
-
-        //draw nodes
-        for(int i =0; i<rg.getRows()+1; i++) {
-            for (int j = 0; j < rg.getColumns() + 1; j++) {
-                gc.fillOval(right * j, down * i, r, r);
-            }
-        }
-
-        //draw edges horizontal
-        for (int i = 0; i <rg.getRows() ; i++) {
-            for (int j = 0; j < rg.getColumns() - 1; j++) {
-                gc.fillRect(0.5 * r + right * j, 0.5 * r + down * i, right, r * 0.1);
-            }
-        }
-
-        //draw edges vertical
-        for (int j = 0; j<rg.getColumns(); j++) {
-            for (int i = 0; i < rg.getRows() - 1; i++) {
-                gc.fillRect(0.45 * r + right * j, 0.5 * r + down * i, r * 0.1, down);
-            }
-        }
-
-    }
-
-
     @FXML
-    public void saveGraph (ActionEvent event) throws FileNotFoundException, UnsupportedEncodingException {
+    public void saveGraph() throws FileNotFoundException, UnsupportedEncodingException {
         File selectedFile = fileChooser.showSaveDialog(null);
 
         //test - print path to file
@@ -209,14 +175,62 @@ public class Controllers implements Initializable {
 
         String value = selectedFile.getAbsolutePath();
         PrintWriter writer = new PrintWriter(value, "UTF-8");
-        gg.writeGraph(writer);
-
-        //test - print graph wrote to the file
-        gg.printGraph();
-
-
+            gg.writeGraph(writer);
+            //test - print graph wrote to the file
+            gg.printGraph();
     }
 
+    public void drawGraph(Graph g) {
+        Canvas canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
+        scrollPane.setContent(canvas);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+        //draw nodes
+        gc.setFill(Color.BLACK);
+        for (int i = 0; i < g.getRows(); i++) {
+            for (int j = 0; j < g.getColumns(); j++) {
+                gc.fillOval((j * (POINT_SIZE + EDGE_LENGTH) + PADDING), (i * (POINT_SIZE + EDGE_LENGTH) + PADDING), POINT_SIZE, POINT_SIZE);
+            }
+        }
+
+        //draw edges horizontal
+        for (int i = 0; i < g.getRows(); i++) {
+            for (int j = 0; j < (g.getColumns() - 1); j++) {
+                int vertexIndex = i * g.getColumns() + j;
+                if (g.getVertex(vertexIndex).hasNeighbour(Vertex.RIGHT)) {
+                    gc.setFill(getWeightColour(g, g.getVertex(vertexIndex).getWeight(Vertex.RIGHT)));
+                    gc.fillRect(((j + 1) * POINT_SIZE + j * EDGE_LENGTH + PADDING),
+                            ((2 * i + 1) * 0.5 * (POINT_SIZE - EDGE_THICKNESS) + i * (EDGE_LENGTH + EDGE_THICKNESS) + PADDING),
+                            EDGE_LENGTH,
+                            EDGE_THICKNESS);
+                }
+            }
+        }
+
+        //draw edges vertical
+        for (int i = 0; i < (g.getRows() - 1); i++) {
+            for (int j = 0; j < g.getColumns(); j++) {
+                int vertexIndex = i * g.getColumns() + j;
+                if (g.getVertex(vertexIndex).hasNeighbour(Vertex.LOWER)) {
+                    gc.setFill(getWeightColour(g, g.getVertex(vertexIndex).getWeight(Vertex.LOWER)));
+                    gc.fillRect(((2 * j + 1) * 0.5 * (POINT_SIZE - EDGE_THICKNESS) + j * (EDGE_LENGTH + EDGE_THICKNESS) + PADDING),
+                            ((i + 1) * POINT_SIZE + i * EDGE_LENGTH + PADDING),
+                            EDGE_THICKNESS,
+                            EDGE_LENGTH);
+                }
+            }
+        }
+    }
+
+    public Color getWeightColour(Graph g, double weight) {
+        double hue = (BLUE - RED) * (weight - g.getWeightLower()) / (g.getWeightUpper() - g.getWeightLower()) + RED;
+        return Color.hsb(hue, 1.0, 1.0);
+    }
+
+    public void updateWeightLabels(Graph g) {
+        weightLowerLabel.setText(String.valueOf(g.getWeightLower()));
+        weightUpperLabel.setText(String.valueOf(g.getWeightUpper()));
+    }
 }
 

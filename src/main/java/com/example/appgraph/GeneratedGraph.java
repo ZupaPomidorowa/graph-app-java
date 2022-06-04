@@ -19,4 +19,8 @@ public interface GeneratedGraph {
 
     int getColumns();
 
+    double getWeightLower();
+
+    double getWeightUpper();
+
 }
