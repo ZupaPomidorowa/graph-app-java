@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.ResourceBundle;
 
 import static java.lang.Double.parseDouble;
@@ -59,6 +60,7 @@ public class Controllers implements Initializable {
     GraphicsContext gc;
 
     ArrayList<NodeXY> listXY =new ArrayList<>();
+
 
     private static final double BLUE = Color.DARKBLUE.getHue();
     private static final double RED = Color.RED.getHue();
@@ -297,10 +299,17 @@ public class Controllers implements Initializable {
                         gc.fillOval(aaa.x, aaa.y, POINT_SIZE, POINT_SIZE);
                         clickedNodes.clear();
                         break;
+                        //return;
                     } else {
+                        gc.setFill(BLACK);
+                        gc.fillOval(clickedNodes.get(0).x, clickedNodes.get(0).y, POINT_SIZE, POINT_SIZE);
+                        gc.fillOval(clickedNodes.get(1).x, clickedNodes.get(1).y, POINT_SIZE, POINT_SIZE);
+
+                        clickedNodes.clear();
+                        clickedNodes.add(xy);
                         gc.setFill(FUCHSIA);
                         gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                        clickedNodes.add(xy);
+
                         break;
                     }
 
