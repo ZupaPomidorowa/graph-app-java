@@ -7,14 +7,47 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Class containing 1 graph.
+ */
 public class Graph implements GeneratedGraph, ReadGraph {
+    /**
+     * Number of rows in the graph.
+     */
     private int rows;
+
+    /**
+     * Number of columns in the graph.
+     */
     private int columns;
+
+    /**
+     * Array containing all vertices.
+     */
     private Vertex [] v;
+
+    /**
+     * Lower end of the range of possible weight values.
+     */
     private double weightLower;
+
+    /**
+     * Upper end of the range of possible weight values.
+     */
     private double weightUpper;
+
+    /**
+     * Random seed for random weight and vertex generation.
+     */
     private final Random r = new Random();
 
+    /**
+     * Creates an empty graph of given dimensions and weight range (to be generated randomly).
+     * @param rows number of rows in the graph
+     * @param columns number of columns in the graph
+     * @param w1 lower end of the weight range
+     * @param w2 upper end of the weight range
+     */
     public Graph(int rows, int columns, double w1, double w2) {
         // generated randomly
         this.rows = rows;
@@ -26,57 +59,107 @@ public class Graph implements GeneratedGraph, ReadGraph {
             v[i] = new Vertex(i);
     }
 
+    /**
+     * Creates an empty graph of unknown dimensions (to be read from a file).
+     */
     public Graph() {
-        // creates an empty graph to be read from a file later
         rows = columns = 0;
         weightLower = Double.POSITIVE_INFINITY;
         weightUpper = -1;
     }
 
+    /**
+     * Calculates the number of vertices in the graph.
+     * @return number of vertices
+     */
     @Override
     public int getGraphSize() {
         return rows * columns;
     }
 
+    /**
+     * Calculates the row in which a vertex is located.
+     * @param index index of the vertex
+     * @return number of row in which the vertex is located
+     */
     private int getCurrentRow(int index) {
         return index / columns;
     }
 
+    /**
+     * Calculates the column in which a vertex is located.
+     * @param index index of the vertex
+     * @return number of column in which the vertex is located
+     */
     private int getCurrentColumn(int index) {
         return index % columns;
     }
 
+    /**
+     * Generates a random weight in a set range.
+     * @return weight value
+     */
     private double getRandomWeight() {
         return weightLower + (weightUpper - weightLower) * r.nextDouble();
     }
 
+    /**
+     * Generates a random vertex index from the graph.
+     * @return vertex index
+     */
     private int getRandomVertex() {
         return r.nextInt(getGraphSize());
     }
+
+    /**
+     * Gets the number of rows in the graph.
+     * @return number of rows
+     */
     @Override
     public  int getRows() {
-        return  rows;
+        return rows;
     }
 
+    /**
+     * Gets the number of columns in the graph.
+     * @return number of columns
+     */
     @Override
     public int getColumns() {
         return columns;
     }
 
+    /**
+     * Gets the lower end of the weight range.
+     * @return lower end of weight range
+     */
     @Override
     public double getWeightLower() {
         return weightLower;
     }
 
+    /**
+     * Gets the upper end of the weight range.
+     * @return upper end of weight range
+     */
     @Override
     public double getWeightUpper() {
         return weightUpper;
     }
+
+    /**
+     * Gets the vertex of a given index.
+     * @param index index of the vertex
+     * @return vertex object
+     */
     @Override
     public Vertex getVertex(int index) {
         return v[index];
     }
 
+    /**
+     * Calculates and sets the weight range of a graph read from a file.
+     */
     private void setWeightRange() {
         for(Vertex current : v) {
             for(int j = 0; j < 4; j++) {
@@ -91,6 +174,9 @@ public class Graph implements GeneratedGraph, ReadGraph {
         }
     }
 
+    /**
+     * Generates a random connected graph of set dimension and weight range.
+     */
     @Override
     public void generateGraph() {
         double w;
@@ -118,7 +204,9 @@ public class Graph implements GeneratedGraph, ReadGraph {
         }
     }
 
-
+    /**
+     * Splits a connected graph into 2 disconnected segments.
+     */
     @Override
     public void splitGraph() {
         int startVertex = 0, finishVertex = 0;
@@ -186,6 +274,41 @@ public class Graph implements GeneratedGraph, ReadGraph {
         }
     }
 
+    /**
+     * Adds a neighbour of an unknown position to a vertex.
+     * @param vertex index of the main vertex
+     * @param neighbour index of the neighbouring vertex
+     * @param weight weight of the edge between the 2 vertices
+     * @return error code (0 - success, -1 - failure)
+     */
+    private int addNeighbour(int vertex, int neighbour, double weight) {
+        if (neighbour < 0 || neighbour >= getGraphSize() || neighbour == vertex || weight <= 0) {
+            return -1;
+        }
+        if (neighbour == (vertex - columns)) {
+            v[vertex].setNeighbour(Vertex.UPPER, neighbour, weight);
+            return 0;
+        }
+        if (neighbour == (vertex - 1)) {
+            v[vertex].setNeighbour(Vertex.LEFT, neighbour, weight);
+            return 0;
+        }
+        if (neighbour == (vertex + 1)) {
+            v[vertex].setNeighbour(Vertex.RIGHT, neighbour, weight);
+            return 0;
+        }
+        if (neighbour == (vertex + columns)) {
+            v[vertex].setNeighbour(Vertex.LOWER, neighbour, weight);
+            return 0;
+        }
+        return -1;
+    }
+
+    /**
+     * Reads a graph from a file.
+     * @param reader provided FileReader
+     * @throws IOException in case of an incorrect file format
+     */
     @Override
     public void readGraph(FileReader reader) throws IOException {
         try {
@@ -194,7 +317,7 @@ public class Graph implements GeneratedGraph, ReadGraph {
             rows = Integer.parseInt(line[0]);
             columns = Integer.parseInt(line[1]);
 
-            if (rows * columns > 1000000 || rows * columns <= 0) {
+            if (rows * columns > 10000 || rows * columns <= 0) {
                 // change to an exception? (arguments out of range or incorrect file format)
                 System.out.println("Error");
             } else {
@@ -222,29 +345,10 @@ public class Graph implements GeneratedGraph, ReadGraph {
         }
     }
 
-    private int addNeighbour(int vertex, int neighbour, double weight) {
-        if (neighbour < 0 || neighbour >= getGraphSize() || neighbour == vertex || weight <= 0) {
-            return -1;
-        }
-        if (neighbour == (vertex - columns)) {
-            v[vertex].setNeighbour(Vertex.UPPER, neighbour, weight);
-            return 0;
-        }
-        if (neighbour == (vertex - 1)) {
-            v[vertex].setNeighbour(Vertex.LEFT, neighbour, weight);
-            return 0;
-        }
-        if (neighbour == (vertex + 1)) {
-            v[vertex].setNeighbour(Vertex.RIGHT, neighbour, weight);
-            return 0;
-        }
-        if (neighbour == (vertex + columns)) {
-            v[vertex].setNeighbour(Vertex.LOWER, neighbour, weight);
-            return 0;
-        }
-        return -1;
-    }
-
+    /**
+     * Writes the graph into a file.
+     * @param writer provided PrintWriter
+     */
     @Override
     public void writeGraph(PrintWriter writer) {
         writer.println(rows + " " + columns);
@@ -254,6 +358,9 @@ public class Graph implements GeneratedGraph, ReadGraph {
         writer.close();
     }
 
+    /**
+     * Prints the graph contents to standard output.
+     */
     @Override
     public void printGraph() {
         System.out.println("rows = " + rows + " columns = " + columns);
