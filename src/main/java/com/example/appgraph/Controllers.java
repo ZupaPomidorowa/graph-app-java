@@ -4,15 +4,18 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.FileChooser;
 import javafx.scene.paint.Color;
 import javafx.scene.control.*;
 import java.io.*;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
+import static javafx.scene.paint.Color.*;
 
 public class Controllers implements Initializable {
 
@@ -53,6 +56,10 @@ public class Controllers implements Initializable {
     ReadGraph rg;
     FileChooser fileChooser = new FileChooser();
 
+    GraphicsContext gc;
+
+    ArrayList<NodeXY> listXY =new ArrayList<>();
+
     private static final double BLUE = Color.DARKBLUE.getHue();
     private static final double RED = Color.RED.getHue();
 
@@ -86,6 +93,12 @@ public class Controllers implements Initializable {
             gg.printGraph();
 
             updateWeightLabels((Graph) gg);
+
+            //splitting graph
+            if (segments > 1) {
+                gg.splitGraph();
+            }
+
             drawGraph((Graph) gg);
             saveFile.setDisable(false);
             checkConnectivity.setDisable(false);
@@ -144,7 +157,7 @@ public class Controllers implements Initializable {
         checkConnectivity.setDisable(true);
     }
     @FXML
-    void checkConnectivity() {    //check box connectivity
+    void checkConnectivity() {
         // NOT THE BEST SOLUTION - TO BE CHANGED!
         if (gg != null) {
             Connectivity bfs = new Connectivity((Graph) gg);
@@ -183,14 +196,20 @@ public class Controllers implements Initializable {
     public void drawGraph(Graph g) {
         Canvas canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
         scrollPane.setContent(canvas);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
+        //GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        int nodeNumber = 0;
 
         //draw nodes
         gc.setFill(Color.BLACK);
         for (int i = 0; i < g.getRows(); i++) {
             for (int j = 0; j < g.getColumns(); j++) {
                 gc.fillOval((j * (POINT_SIZE + EDGE_LENGTH) + PADDING), (i * (POINT_SIZE + EDGE_LENGTH) + PADDING), POINT_SIZE, POINT_SIZE);
+                NodeXY nodexy = new NodeXY(nodeNumber, (j * (POINT_SIZE + EDGE_LENGTH) + PADDING), (i * (POINT_SIZE + EDGE_LENGTH) + PADDING), i, j);
+                listXY.add(nodexy);
+                nodeNumber ++;
             }
         }
 
@@ -232,5 +251,73 @@ public class Controllers implements Initializable {
         weightLowerLabel.setText(String.valueOf(g.getWeightLower()));
         weightUpperLabel.setText(String.valueOf(g.getWeightUpper()));
     }
+
+
+
+    ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
+    public void mouseListener(MouseEvent event) {
+
+        double mousex = event.getX();
+        double mousey = event.getY();
+
+        if (clickedNodes.size() == 0) {
+            for (NodeXY xy : listXY) {
+                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    gc.setFill(FUCHSIA);
+                    gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                    clickedNodes.add(xy);
+                    break;
+                }
+            }
+        } else if (clickedNodes.size() == 1) {
+            for (NodeXY xy : listXY) {
+                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    if (clickedNodes.contains(xy)) {
+                        gc.setFill(BLACK);
+                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                        //clickedNodes.remove(xy);
+                        clickedNodes.clear();
+                        break;
+                    } else {
+                        gc.setFill(FUCHSIA);
+                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                        clickedNodes.add(xy);
+                        break;
+                    }
+                }
+            }
+        } else if (clickedNodes.size() == 2) {
+            for (NodeXY xy : listXY) {
+                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    if (clickedNodes.contains(xy)) {
+                        gc.setFill(BLACK);
+                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                        clickedNodes.remove(xy);
+                        NodeXY aaa = clickedNodes.get(0);
+                        gc.fillOval(aaa.x, aaa.y, POINT_SIZE, POINT_SIZE);
+                        clickedNodes.clear();
+                        break;
+                    } else {
+                        gc.setFill(FUCHSIA);
+                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                        clickedNodes.add(xy);
+                        break;
+                    }
+
+                }
+
+            }
+
+        }
+
+
+    }
+
+
+
+
+
+
+
 }
 

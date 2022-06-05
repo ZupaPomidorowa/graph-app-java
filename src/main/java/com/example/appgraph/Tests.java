@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class Tests {
     public static void main(String[] args) throws FileNotFoundException, UnsupportedEncodingException {
         // random graph generation test
+        /*
         GeneratedGraph gg = new Graph(3, 4, 0, 10);
         gg.generateGraph();
         gg.printGraph();
@@ -23,6 +24,8 @@ public class Tests {
         } else {
             System.out.println("The graph is disconnected.");
         }
+
+         */
 
         // graph file reading
         /*ReadGraph rg = new Graph();
@@ -55,5 +58,20 @@ public class Tests {
             }
             System.out.println(path.get(0) + ".");
         }*/
+
+        GeneratedGraph gg = new Graph(3, 4, 0, 10);
+        gg.generateGraph();
+        gg.printGraph();
+        Path dijkstry = new Path((Graph) gg);
+        int startVertex = 0;
+        int finishVertex = 6;
+        ArrayList<Integer> path = dijkstry.findPath((Graph) gg, startVertex, finishVertex);
+        if(path != null) {
+            System.out.print("Path between " + startVertex + " and " + finishVertex + ": ");
+            for(int i = (path.size() - 1); i > 0; i--) {
+                System.out.print(path.get(i) + "-");
+            }
+            System.out.println(path.get(0) + ".");
+        }
     }
 }
