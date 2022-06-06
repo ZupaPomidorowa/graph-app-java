@@ -18,12 +18,12 @@
        <Label layoutX="270.0" layoutY="16.0" text="Segments" />
        <Label layoutX="178.0" layoutY="16.0" text="Weight" />
        <Label layoutX="221.0" layoutY="16.0" text="range" />
-       <TextField fx:id="min" layoutX="179.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
+       <TextField fx:id="weightLowerField" layoutX="179.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
        <TextField fx:id="columnsField" layoutX="110.0" layoutY="37.0" prefHeight="25.0" prefWidth="53.0" />
        <TextField fx:id="rowsField" layoutX="37.0" layoutY="37.0" prefHeight="25.0" prefWidth="52.0" />
        <Label layoutX="113.0" layoutY="16.0" text="Columns" />
        <Label layoutX="49.0" layoutY="16.0" text="Rows" />
-       <TextField fx:id="max" layoutX="220.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
+       <TextField fx:id="weightUpperField" layoutX="220.0" layoutY="37.0" prefHeight="25.0" prefWidth="31.0" />
        <Label fx:id="weightLowerLabel" layoutX="26.0" layoutY="719.0" prefHeight="18.0" prefWidth="55.0" />
        <Label fx:id="weightUpperLabel" layoutX="216.0" layoutY="719.0" prefHeight="18.0" prefWidth="55.0" textAlignment="RIGHT" />
        <Label layoutX="100.0" layoutY="720.0" text="Weight scale" />
@@ -32,7 +32,7 @@
             <Image url="@icons/rainbow.png" />
          </image>
       </ImageView>
-      <Label fx:id="connectivityInfo" layoutX="482.0" layoutY="703.0" prefHeight="33.0" prefWidth="223.0">
+      <Label fx:id="connectivityLabel" layoutX="482.0" layoutY="703.0" prefHeight="33.0" prefWidth="223.0">
          <font>
             <Font size="18.0" />
          </font></Label>

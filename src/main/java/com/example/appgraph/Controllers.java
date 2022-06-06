@@ -22,10 +22,10 @@ public class Controllers implements Initializable {
     private ScrollPane scrollPane = new ScrollPane();
 
     @FXML
-    private TextField min;
+    private TextField weightLowerField;
 
     @FXML
-    private TextField max;
+    private TextField weightUpperField;
 
     @FXML
     private TextField rowsField;
@@ -43,7 +43,7 @@ public class Controllers implements Initializable {
     private Button checkConnectivity;
 
     @FXML
-    private Label connectivityInfo;
+    private Label connectivityLabel;
 
     @FXML
     private Label weightLowerLabel;
@@ -54,12 +54,9 @@ public class Controllers implements Initializable {
     GeneratedGraph gg;
     ReadGraph rg;
     FileChooser fileChooser = new FileChooser();
-
     Canvas canvas;
     GraphicsContext gc;
-
-    ArrayList<NodeXY> listXY =new ArrayList<>();
-
+    ArrayList<NodeXY> listXY = new ArrayList<>();
 
     private static final double BLUE = Color.DARKBLUE.getHue();
     private static final double RED = Color.RED.getHue();
@@ -74,8 +71,8 @@ public class Controllers implements Initializable {
         try {
             int rows = parseInt(rowsField.getText());
             int columns = parseInt(columnsField.getText());
-            double w1 = parseDouble(min.getText());
-            double w2 = parseDouble(max.getText());
+            double w1 = parseDouble(weightLowerField.getText());
+            double w2 = parseDouble(weightUpperField.getText());
             int segments = parseInt(segmentsField.getText());
 
             if (rows * columns > 10000 || rows <= 0 || columns <= 0 ||
@@ -105,7 +102,7 @@ public class Controllers implements Initializable {
             drawGraph((Graph) gg);
             saveFile.setDisable(false);
             checkConnectivity.setDisable(false);
-            connectivityInfo.setText("");
+            connectivityLabel.setText("");
         } catch (NumberFormatException e) {
             System.err.println("Incorrect argument format." + e);
             Alert popUp = new Alert(Alert.AlertType.ERROR);
@@ -141,7 +138,7 @@ public class Controllers implements Initializable {
             updateWeightLabels((Graph) rg);
             drawGraph((Graph) rg);
             checkConnectivity.setDisable(false);
-            connectivityInfo.setText("");
+            connectivityLabel.setText("");
         } catch (IOException e) {
             rg = null;
             System.err.println("Incorrect file format." + e);
@@ -159,29 +156,31 @@ public class Controllers implements Initializable {
         saveFile.setDisable(true);
         checkConnectivity.setDisable(true);
     }
+
     @FXML
     void checkConnectivity() {
         // NOT THE BEST SOLUTION - TO BE CHANGED!
         if (gg != null) {
             Connectivity bfs = new Connectivity((Graph) gg);
             if (bfs.isConnected((Graph) gg)) {
-                connectivityInfo.setText("The graph is connected.");
+                connectivityLabel.setText("The graph is connected.");
                 System.out.println("The graph is connected.");
             } else {
-                connectivityInfo.setText("The graph is disconnected.");
+                connectivityLabel.setText("The graph is disconnected.");
                 System.out.println("The graph is disconnected.");
             }
         } else {
             Connectivity bfs = new Connectivity((Graph) rg);
             if (bfs.isConnected((Graph) rg)) {
-                connectivityInfo.setText("The graph is connected.");
+                connectivityLabel.setText("The graph is connected.");
                 System.out.println("The graph is connected.");
             } else {
-                connectivityInfo.setText("The graph is disconnected.");
+                connectivityLabel.setText("The graph is disconnected.");
                 System.out.println("The graph is disconnected.");
             }
         }
     }
+
     @FXML
     public void saveGraph() throws FileNotFoundException, UnsupportedEncodingException {
         File selectedFile = fileChooser.showSaveDialog(null);
@@ -322,8 +321,6 @@ public class Controllers implements Initializable {
         weightUpperLabel.setText(String.valueOf(g.getWeightUpper()));
     }
 
-
-
     ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
     /*public void mouseListener(MouseEvent event) {
         double mousex = event.getX();
@@ -379,21 +376,9 @@ public class Controllers implements Initializable {
 
                         break;
                     }
-
                 }
-
             }
-
         }
-
-
     }*/
-
-
-
-
-
-
-
 }
 

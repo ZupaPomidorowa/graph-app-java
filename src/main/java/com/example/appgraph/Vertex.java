@@ -12,12 +12,14 @@ public class Vertex {
     /**
      * Array containing indexes of all of vertex's neighbours.
      * Order: upper (v - columns), left (v - 1), right (v + 1), lower (v + columns).
+     * (-1) if no neighbour present at the position.
      */
     private final int [] neighbour = new int [4];
 
     /**
      * Array containing weights of all of vertex's edges
      * Order: upper (v - columns), left (v - 1), right (v + 1), lower (v + columns).
+     * (-1) if no edge present at the position.
      */
     private final double [] weight = new double [4];
 
