@@ -15,8 +15,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * Class creating window for app.
+ */
 public class AppView extends Application {
-
+    /**
+     * Start method for window.
+     * @param stage stage
+     * @throws IOException exception
+     */
     @Override
     public void start(Stage stage) throws IOException {
         FXMLLoader fxmlLoader = new FXMLLoader(AppView.class.getResource("hello-view.fxml"));
@@ -32,6 +39,10 @@ public class AppView extends Application {
 
     }
 
+    /**
+     * Main
+     * @param args arguments
+     */
     public static void main(String[] args) {
         launch();
 

@@ -16,56 +16,117 @@ import static java.lang.Double.parseDouble;
 import static java.lang.Integer.parseInt;
 import static javafx.scene.paint.Color.*;
 
+/**
+ * Class to control GUI
+ */
 public class Controllers implements Initializable {
-
+    /**
+     * Creating ScrollPane.
+     */
     @FXML
     private ScrollPane scrollPane = new ScrollPane();
-
+    /**
+     * Text field for lower weight.
+     */
     @FXML
     private TextField weightLowerField;
-
+    /**
+     * Text field for upper weight.
+     */
     @FXML
     private TextField weightUpperField;
-
+    /**
+     * Text field for number of rows.
+     */
     @FXML
     private TextField rowsField;
-
+    /**
+     * Text field for number of columns.
+     */
     @FXML
     private TextField columnsField;
-
+    /**
+     * Text field for number of segments.
+     */
     @FXML
     private TextField segmentsField;
-
+    /**
+     * Button for saving file.
+     */
     @FXML
     private Button saveFile;
-
+    /**
+     * Button for checking connectivity.
+     */
     @FXML
     private Button checkConnectivity;
-
+    /**
+     * Label describing if graph is connected or disconnected.
+     */
     @FXML
     private Label connectivityLabel;
-
+    /**
+     * Label for lower weight.
+     */
     @FXML
     private Label weightLowerLabel;
-
+    /**
+     * Label for upper weight.
+     */
     @FXML
     private Label weightUpperLabel;
-
+    /**
+     * Graph generated from gui.
+     */
     GeneratedGraph gg;
+    /**
+     * Graph read from file.
+     */
     ReadGraph rg;
+    /**
+     * Choosing file.
+     */
     FileChooser fileChooser = new FileChooser();
+    /**
+     * Canva on scroll pane
+     */
     Canvas canvas;
+    /**
+     * GraphicContext for draw on canvas.
+     */
     GraphicsContext gc;
+    /**
+     * List of node coordinates.
+     */
     ArrayList<NodeXY> listXY = new ArrayList<>();
-
+    /**
+     * Dark blue colour
+     */
     private static final double BLUE = Color.DARKBLUE.getHue();
+    /**
+     * Red colour
+     */
     private static final double RED = Color.RED.getHue();
-
+    /**
+     * Node diameter
+     */
     private static final int POINT_SIZE = 20;
+    /**
+     * Length of edge
+     */
     private static final int EDGE_LENGTH = 20;
+    /**
+     * Edge width
+     */
     private static final int EDGE_THICKNESS = 5;
+    /**
+     * Margin in canvas
+     */
     private static final int PADDING = 20;
 
+    /**
+     * Generating graph from gui parameters and drawing on canvas.
+     */
     @FXML
     void generate() {
         try {
@@ -120,6 +181,9 @@ public class Controllers implements Initializable {
         }
     }
 
+    /**
+     * Importing file and drawing.
+     */
     @FXML
     void importFile() {
         saveFile.setDisable(true);
@@ -157,6 +221,9 @@ public class Controllers implements Initializable {
         checkConnectivity.setDisable(true);
     }
 
+    /**
+     * Checking if grph is connected.
+     */
     @FXML
     void checkConnectivity() {
         // NOT THE BEST SOLUTION - TO BE CHANGED!
@@ -181,6 +248,11 @@ public class Controllers implements Initializable {
         }
     }
 
+    /**
+     * Saving generated graph.
+     * @throws FileNotFoundException exception file not found
+     * @throws UnsupportedEncodingException exception unsupported encoding
+     */
     @FXML
     public void saveGraph() throws FileNotFoundException, UnsupportedEncodingException {
         File selectedFile = fileChooser.showSaveDialog(null);
@@ -195,6 +267,10 @@ public class Controllers implements Initializable {
             gg.printGraph();
     }
 
+    /**
+     * Drawing graph, if clicked on node change node colour
+     * @param g generated graph or graph read from file
+     */
     public void drawGraph(Graph g) {
         canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
         scrollPane.setContent(canvas);
@@ -311,16 +387,29 @@ public class Controllers implements Initializable {
         });
     }
 
+    /**
+     * Get edge colour depending on weight
+     * @param g graph
+     * @param weight edge weight
+     * @return edge colour
+     */
     public Color getWeightColour(Graph g, double weight) {
         double hue = (BLUE - RED) * (weight - g.getWeightLower()) / (g.getWeightUpper() - g.getWeightLower()) + RED;
         return Color.hsb(hue, 1.0, 1.0);
     }
 
+    /**
+     * Setting graph weights under colour scale
+     * @param g graph
+     */
     public void updateWeightLabels(Graph g) {
         weightLowerLabel.setText(String.valueOf(g.getWeightLower()));
         weightUpperLabel.setText(String.valueOf(g.getWeightUpper()));
     }
 
+    /**
+     * List of clicked nodes.
+     */
     ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
     /*public void mouseListener(MouseEvent event) {
         double mousex = event.getX();
