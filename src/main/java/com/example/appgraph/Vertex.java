@@ -6,9 +6,6 @@ import java.util.Arrays;
  * Class containing 1 vertex.
  */
 public class Vertex {
-    // maybe get rid of the index here
-    private final int index;
-
     /**
      * Array containing indexes of all of vertex's neighbours.
      * Order: upper (v - columns), left (v - 1), right (v + 1), lower (v + columns).
@@ -45,10 +42,8 @@ public class Vertex {
 
     /**
      * Creates an empty vertex of a given index.
-     * @param index index of the vertex
      */
-    public Vertex(int index) {
-        this.index = index;
+    public Vertex() {
         Arrays.fill(neighbour, -1);
         Arrays.fill(weight, -1);
     }

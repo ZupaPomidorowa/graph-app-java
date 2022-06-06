@@ -3,26 +3,17 @@ package com.example.appgraph;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.shape.ArcType;
 import javafx.stage.Stage;
-import javafx.scene.canvas.*;
-//
-import javafx.fxml.FXML;
-import javafx.scene.paint.Color;
-import javafx.scene.Group;
-
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 /**
- * Class creating window for app.
+ * Class creating a window for the app.
  */
 public class AppView extends Application {
     /**
-     * Start method for window.
-     * @param stage stage
-     * @throws IOException exception
+     * Starts the app window.
+     * @param stage app window
+     * @throws IOException in case of an FXML loading error
      */
     @Override
     public void start(Stage stage) throws IOException {
@@ -32,7 +23,7 @@ public class AppView extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
 
-        Controllers test = new Controllers();
+        //Controllers test = new Controllers();
 
         stage.show();
 
@@ -40,8 +31,8 @@ public class AppView extends Application {
     }
 
     /**
-     * Main
-     * @param args arguments
+     * Launches the app
+     * @param args command line arguments
      */
     public static void main(String[] args) {
         launch();

@@ -17,46 +17,46 @@ import static java.lang.Integer.parseInt;
 import static javafx.scene.paint.Color.*;
 
 /**
- * Class to control GUI
+ * Class controlling the GUI.
  */
 public class Controllers implements Initializable {
     /**
-     * Creating ScrollPane.
+     * ScrollPane in which the canvas with the graph is located.
      */
     @FXML
     private ScrollPane scrollPane = new ScrollPane();
     /**
-     * Text field for lower weight.
+     * Text field for the lower end of the weight range.
      */
     @FXML
     private TextField weightLowerField;
     /**
-     * Text field for upper weight.
+     * Text field for the upper end of the weight range.
      */
     @FXML
     private TextField weightUpperField;
     /**
-     * Text field for number of rows.
+     * Text field for the number of rows.
      */
     @FXML
     private TextField rowsField;
     /**
-     * Text field for number of columns.
+     * Text field for the number of columns.
      */
     @FXML
     private TextField columnsField;
     /**
-     * Text field for number of segments.
+     * Text field for the number of segments.
      */
     @FXML
     private TextField segmentsField;
     /**
-     * Button for saving file.
+     * Button for saving the graph file.
      */
     @FXML
     private Button saveFile;
     /**
-     * Button for checking connectivity.
+     * Button for checking the connectivity of a graph.
      */
     @FXML
     private Button checkConnectivity;
@@ -66,66 +66,70 @@ public class Controllers implements Initializable {
     @FXML
     private Label connectivityLabel;
     /**
-     * Label for lower weight.
+     * Label for the lower end of the weight range.
      */
     @FXML
     private Label weightLowerLabel;
     /**
-     * Label for upper weight.
+     * Label for the upper end of the weight range.
      */
     @FXML
     private Label weightUpperLabel;
     /**
-     * Graph generated from gui.
+     * Graph generated at runtime.
      */
     GeneratedGraph gg;
     /**
-     * Graph read from file.
+     * Graph read from a file.
      */
     ReadGraph rg;
     /**
-     * Choosing file.
+     * File choosing window.
      */
     FileChooser fileChooser = new FileChooser();
     /**
-     * Canva on scroll pane
+     * Canvas in the ScrollPane on which the graph is drawn.
      */
     Canvas canvas;
     /**
-     * GraphicContext for draw on canvas.
+     * GraphicContext for drawing on the canvas.
      */
     GraphicsContext gc;
     /**
-     * List of node coordinates.
+     * List of vertex coordinates on the canvas.
      */
     ArrayList<NodeXY> listXY = new ArrayList<>();
     /**
-     * Dark blue colour
+     * List of clicked nodes.
+     */
+    ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
+    /**
+     * Dark blue hue (lower end of the weight range).
      */
     private static final double BLUE = Color.DARKBLUE.getHue();
     /**
-     * Red colour
+     * Red hue (upper end of the weight range).
      */
     private static final double RED = Color.RED.getHue();
     /**
-     * Node diameter
+     * Vertex graphical representation diameter.
      */
     private static final int POINT_SIZE = 20;
     /**
-     * Length of edge
+     * Edge graphical representation length.
      */
     private static final int EDGE_LENGTH = 20;
     /**
-     * Edge width
+     * Edge graphical representation width.
      */
     private static final int EDGE_THICKNESS = 5;
     /**
-     * Margin in canvas
+     * Margin on the canvas.
      */
     private static final int PADDING = 20;
 
     /**
-     * Generating graph from gui parameters and drawing on canvas.
+     * Generates a graph from user-provided parameters.
      */
     @FXML
     void generate() {
@@ -182,7 +186,7 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Importing file and drawing.
+     * Reads a graph from a user-imported file.
      */
     @FXML
     void importFile() {
@@ -222,7 +226,7 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Checking if grph is connected.
+     * Checks if the graph is connected.
      */
     @FXML
     void checkConnectivity() {
@@ -249,9 +253,9 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Saving generated graph.
-     * @throws FileNotFoundException exception file not found
-     * @throws UnsupportedEncodingException exception unsupported encoding
+     * Saves the generated graph into a file.
+     * @throws FileNotFoundException in case of the file being unable to be found
+     * @throws UnsupportedEncodingException in case of an unsupported encoding
      */
     @FXML
     public void saveGraph() throws FileNotFoundException, UnsupportedEncodingException {
@@ -268,8 +272,8 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Drawing graph, if clicked on node change node colour
-     * @param g generated graph or graph read from file
+     * Draws the graph, highlights a clicked vertex.
+     * @param g generated graph or graph read from a file
      */
     public void drawGraph(Graph g) {
         canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
@@ -325,12 +329,12 @@ public class Controllers implements Initializable {
         // enable vertex selection for path display
         canvas.setOnMouseClicked(event -> {
             // TO BE CHANGED!
-            double mousex = event.getX();
-            double mousey = event.getY();
+            double mouseX = event.getX();
+            double mouseY = event.getY();
 
             if (clickedNodes.size() == 0) {
                 for (NodeXY xy : listXY) {
-                    if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
                         gc.setFill(FUCHSIA);
                         gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
                         clickedNodes.add(xy);
@@ -339,7 +343,7 @@ public class Controllers implements Initializable {
                 }
             } else if (clickedNodes.size() == 1) {
                 for (NodeXY xy : listXY) {
-                    if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
                         if(clickedNodes.contains(xy)) {
                             gc.setFill(BLACK);
                             gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
@@ -356,7 +360,7 @@ public class Controllers implements Initializable {
                 }
             } else if (clickedNodes.size() == 2) {
                 for (NodeXY xy : listXY) {
-                    if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
+                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
                         if (clickedNodes.contains(xy)) {
                             gc.setFill(BLACK);
                             gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
@@ -388,10 +392,10 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Get edge colour depending on weight
+     * Gets edge colour depending on the weight.
      * @param g graph
-     * @param weight edge weight
-     * @return edge colour
+     * @param weight weight value
+     * @return colour value
      */
     public Color getWeightColour(Graph g, double weight) {
         double hue = (BLUE - RED) * (weight - g.getWeightLower()) / (g.getWeightUpper() - g.getWeightLower()) + RED;
@@ -399,75 +403,12 @@ public class Controllers implements Initializable {
     }
 
     /**
-     * Setting graph weights under colour scale
+     * Updates graph weight range labels (under the colour scale).
      * @param g graph
      */
     public void updateWeightLabels(Graph g) {
         weightLowerLabel.setText(String.valueOf(g.getWeightLower()));
         weightUpperLabel.setText(String.valueOf(g.getWeightUpper()));
     }
-
-    /**
-     * List of clicked nodes.
-     */
-    ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
-    /*public void mouseListener(MouseEvent event) {
-        double mousex = event.getX();
-        double mousey = event.getY();
-
-        if (clickedNodes.size() == 0) {
-            for (NodeXY xy : listXY) {
-                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
-                    gc.setFill(FUCHSIA);
-                    gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                    clickedNodes.add(xy);
-                    break;
-                }
-            }
-        } else if (clickedNodes.size() == 1) {
-            for (NodeXY xy : listXY) {
-                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
-                    if (clickedNodes.contains(xy)) {
-                        gc.setFill(BLACK);
-                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                        //clickedNodes.remove(xy);
-                        clickedNodes.clear();
-                        break;
-                    } else {
-                        gc.setFill(FUCHSIA);
-                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                        clickedNodes.add(xy);
-                        break;
-                    }
-                }
-            }
-        } else if (clickedNodes.size() == 2) {
-            for (NodeXY xy : listXY) {
-                if (mousex > xy.x && mousex < xy.x + POINT_SIZE && mousey > xy.y && mousey < xy.y + POINT_SIZE) {
-                    if (clickedNodes.contains(xy)) {
-                        gc.setFill(BLACK);
-                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                        clickedNodes.remove(xy);
-                        NodeXY aaa = clickedNodes.get(0);
-                        gc.fillOval(aaa.x, aaa.y, POINT_SIZE, POINT_SIZE);
-                        clickedNodes.clear();
-                        break;
-                        //return;
-                    } else {
-                        gc.setFill(BLACK);
-                        gc.fillOval(clickedNodes.get(0).x, clickedNodes.get(0).y, POINT_SIZE, POINT_SIZE);
-                        gc.fillOval(clickedNodes.get(1).x, clickedNodes.get(1).y, POINT_SIZE, POINT_SIZE);
-
-                        clickedNodes.clear();
-                        clickedNodes.add(xy);
-                        gc.setFill(FUCHSIA);
-                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-
-                        break;
-                    }
-                }
-            }
-        }
-    }*/
 }
 

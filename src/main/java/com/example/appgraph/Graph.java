@@ -56,7 +56,7 @@ public class Graph implements GeneratedGraph, ReadGraph {
         this.weightUpper = w2;
         v = new Vertex[rows * columns];
         for(int i = 0; i < getGraphSize(); i++)
-            v[i] = new Vertex(i);
+            v[i] = new Vertex();
     }
 
     /**
@@ -323,7 +323,7 @@ public class Graph implements GeneratedGraph, ReadGraph {
             } else {
                 v = new Vertex[rows * columns];
                 for (int i = 0; i < getGraphSize(); i++)
-                    v[i] = new Vertex(i);
+                    v[i] = new Vertex();
 
                 int neighbour;
                 double weight;

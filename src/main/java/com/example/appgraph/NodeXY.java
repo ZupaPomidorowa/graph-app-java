@@ -1,43 +1,43 @@
 package com.example.appgraph;
 
 /**
- * Class containing node constructor.
+ * Class containing a vertex's position.
  */
 public class NodeXY {
     /**
-     * X coordinate.
+     * X coordinate on the canvas.
      */
     int x;
     /**
-     * Y coordinate.
+     * Y coordinate on the canvas.
      */
     int y;
     /**
-     * Number of row.
+     * Vertex's row position.
      */
-    int i;
+    int row;
     /**
-     * Nuber of column.
+     * Vertex's column position.
      */
-    int j;
+    int column;
     /**
-     * Node number.
+     * Vertex's index.
      */
-    int nodeNumber;
+    int index;
 
     /**
-     * Constructor for node
-     * @param nodeNumber node number
-     * @param x X coordinate
-     * @param y Y coordinate
-     * @param i number of row
-     * @param j number of column
+     * Constructs a vertex's position info.
+     * @param index vertex's index
+     * @param x x coordinate
+     * @param y y coordinate
+     * @param row row position
+     * @param column column position
      */
-    public NodeXY(int nodeNumber, int x, int y, int i, int j) {
-        this.nodeNumber = nodeNumber;
+    public NodeXY(int index, int x, int y, int row, int column) {
+        this.index = index;
         this.x = x;
         this.y = y;
-        this.i = i;
-        this.j = j;
+        this.row = row;
+        this.column = column;
     }
 }
