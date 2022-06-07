@@ -249,8 +249,9 @@ public class Graph implements GeneratedGraph, ReadGraph {
             }
         }
 
+        // maybe delete this?
         // for all vertices that became entirely disconnected, restore 1 possible edge
-        double w = 0;
+        /*double w = 0;
         for(int i = 0; i < getGraphSize(); i++) {
             if(v[i].countNeighbours() == 0) {
                 if(getCurrentRow(i) != 0) {
@@ -271,7 +272,7 @@ public class Graph implements GeneratedGraph, ReadGraph {
                     v[i + columns].setNeighbour(Vertex.UPPER, i, w);
                 }
             }
-        }
+        }*/
     }
 
     /**

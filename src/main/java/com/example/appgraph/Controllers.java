@@ -2,6 +2,7 @@ package com.example.appgraph;
 
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.stage.FileChooser;
@@ -10,6 +11,8 @@ import javafx.scene.control.*;
 import java.io.*;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import static java.lang.Double.parseDouble;
@@ -96,13 +99,18 @@ public class Controllers implements Initializable {
      */
     GraphicsContext gc;
     /**
-     * List of vertex coordinates on the canvas.
+     * Map of vertex coordinates on the canvas.
      */
-    ArrayList<NodeXY> listXY = new ArrayList<>();
+    Map<Integer, Point2D> vertexCoordinates = new HashMap<>();
+
+    int startVertex;
+
+    int finishVertex;
+
     /**
      * List of clicked nodes.
      */
-    ArrayList<NodeXY> clickedNodes = new ArrayList<>(2); // do zmiany
+    ArrayList<Point2D> clickedNodes = new ArrayList<>(2); // to be changed?
     /**
      * Dark blue hue (lower end of the weight range).
      */
@@ -278,23 +286,21 @@ public class Controllers implements Initializable {
     public void drawGraph(Graph g) {
         canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
         scrollPane.setContent(canvas);
-        //GraphicsContext gc = canvas.getGraphicsContext2D();
         gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        int nodeNumber = 0;
 
         //draw nodes
         gc.setFill(Color.BLACK);
         for (int i = 0; i < g.getRows(); i++) {
             for (int j = 0; j < g.getColumns(); j++) {
+                int vertexIndex = i * g.getColumns() + j;
                 gc.fillOval((j * (POINT_SIZE + EDGE_LENGTH) + PADDING),
                         (i * (POINT_SIZE + EDGE_LENGTH) + PADDING),
                         POINT_SIZE,
                         POINT_SIZE);
-                NodeXY nodexy = new NodeXY(nodeNumber, (j * (POINT_SIZE + EDGE_LENGTH) + PADDING), (i * (POINT_SIZE + EDGE_LENGTH) + PADDING), i, j);
-                listXY.add(nodexy);
-                nodeNumber++;
+                vertexCoordinates.put(vertexIndex,
+                        new Point2D((j * (POINT_SIZE + EDGE_LENGTH) + (POINT_SIZE / 2) + PADDING),
+                                (i * (POINT_SIZE + EDGE_LENGTH) + (POINT_SIZE / 2) + PADDING)));
             }
         }
 
@@ -326,60 +332,92 @@ public class Controllers implements Initializable {
             }
         }
 
-        // enable vertex selection for path display
+        // enable vertex selection for shortest path finding
         canvas.setOnMouseClicked(event -> {
             // TO BE CHANGED!
             double mouseX = event.getX();
             double mouseY = event.getY();
+            Point2D mousePoint = new Point2D(mouseX, mouseY);
 
             if (clickedNodes.size() == 0) {
-                for (NodeXY xy : listXY) {
-                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
+                for (int i = 0; i < g.getGraphSize(); i++) {
+                    Point2D vertexCenterPoint = vertexCoordinates.get(i);
+                    startVertex = i;
+                    if (pointDistance(mousePoint, vertexCenterPoint) <= (POINT_SIZE / 2)) {
                         gc.setFill(FUCHSIA);
-                        gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                        clickedNodes.add(xy);
+                        gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
+                                (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
+                                POINT_SIZE,
+                                POINT_SIZE);
+                        clickedNodes.add(vertexCenterPoint);
                         break;
                     }
                 }
             } else if (clickedNodes.size() == 1) {
-                for (NodeXY xy : listXY) {
-                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
-                        if(clickedNodes.contains(xy)) {
+                for (int i = 0; i < g.getGraphSize(); i++) {
+                    Point2D vertexCenterPoint = vertexCoordinates.get(i);
+                    finishVertex = i;
+                    if (pointDistance(mousePoint, vertexCenterPoint) <= (POINT_SIZE / 2)) {
+                        if(clickedNodes.contains(vertexCenterPoint)) {
                             gc.setFill(BLACK);
-                            gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                            //clickedNodes.remove(xy);
+                            gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
+                                    (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
                             clickedNodes.clear();
+                            drawGraph(g);
                             break;
                         } else {
                             gc.setFill(FUCHSIA);
-                            gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                            clickedNodes.add(xy);
+                            gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
+                                    (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
+                            clickedNodes.add(vertexCenterPoint);
+                            drawPath(g);
                             break;
                         }
                     }
                 }
             } else if (clickedNodes.size() == 2) {
-                for (NodeXY xy : listXY) {
-                    if (mouseX > xy.x && mouseX < xy.x + POINT_SIZE && mouseY > xy.y && mouseY < xy.y + POINT_SIZE) {
-                        if (clickedNodes.contains(xy)) {
+                for (int i = 0; i < g.getGraphSize(); i++) {
+                    Point2D vertexCenterPoint = vertexCoordinates.get(i);
+                    startVertex = i;
+                    if (pointDistance(mousePoint, vertexCenterPoint) <= (POINT_SIZE / 2)) {
+                        if (clickedNodes.contains(vertexCenterPoint)) {
                             gc.setFill(BLACK);
-                            gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
-                            clickedNodes.remove(xy);
-                            NodeXY aaa = clickedNodes.get(0);
-                            gc.fillOval(aaa.x, aaa.y, POINT_SIZE, POINT_SIZE);
+                            gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
+                                    (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
+                            clickedNodes.remove(vertexCenterPoint);
+                            Point2D previouslyClicked = clickedNodes.get(0);
+                            gc.fillOval((previouslyClicked.getX() - (POINT_SIZE / 2)),
+                                    (previouslyClicked.getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
                             clickedNodes.clear();
+                            drawGraph(g);
                             break;
-                            //return;
                         } else {
                             gc.setFill(BLACK);
-                            gc.fillOval(clickedNodes.get(0).x, clickedNodes.get(0).y, POINT_SIZE, POINT_SIZE);
-                            gc.fillOval(clickedNodes.get(1).x, clickedNodes.get(1).y, POINT_SIZE, POINT_SIZE);
-
+                            gc.fillOval((clickedNodes.get(0).getX() - (POINT_SIZE / 2)),
+                                    (clickedNodes.get(0).getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
+                            gc.fillOval((clickedNodes.get(1).getX() - (POINT_SIZE / 2)),
+                                    (clickedNodes.get(1).getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
                             clickedNodes.clear();
-                            clickedNodes.add(xy);
-                            gc.setFill(FUCHSIA);
-                            gc.fillOval(xy.x, xy.y, POINT_SIZE, POINT_SIZE);
+                            drawGraph(g);
 
+                            clickedNodes.add(vertexCenterPoint);
+                            gc.setFill(FUCHSIA);
+                            gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
+                                    (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
+                                    POINT_SIZE,
+                                    POINT_SIZE);
                             break;
                         }
 
@@ -397,9 +435,48 @@ public class Controllers implements Initializable {
      * @param weight weight value
      * @return colour value
      */
-    public Color getWeightColour(Graph g, double weight) {
+    private Color getWeightColour(Graph g, double weight) {
         double hue = (BLUE - RED) * (weight - g.getWeightLower()) / (g.getWeightUpper() - g.getWeightLower()) + RED;
         return Color.hsb(hue, 1.0, 1.0);
+    }
+
+    private double pointDistance(Point2D p1, Point2D p2) {
+        double x1 = p1.getX();
+        double y1 = p1.getY();
+        double x2 = p2.getX();
+        double y2 = p2.getY();
+
+        return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+
+    private void drawPath(Graph g) {
+        Path dijkstry = new Path(g);
+        ArrayList<Integer> path = dijkstry.findPath(g, startVertex, finishVertex);
+        if (path != null) {
+            System.out.print("Path between " + startVertex + " and " + finishVertex + ": ");
+            for (int i = (path.size() - 1); i > 0; i--) {
+                System.out.print(path.get(i) + "-");
+            }
+            System.out.println(path.get(0) + ".");
+        } else {
+            System.out.println("Path between " + startVertex + " and " + finishVertex + " doesn't exist.");
+            Alert popUp = new Alert(Alert.AlertType.INFORMATION);
+            popUp.setTitle("Path finder");
+            popUp.setHeaderText("Path doesn't exist");
+            popUp.setContentText("The path between vertices " + startVertex + " and " + finishVertex + " doesn't exist.");
+            popUp.showAndWait();
+            return;
+        }
+
+        gc.setStroke(FUCHSIA);
+        gc.setLineWidth(EDGE_THICKNESS);
+        for(int i = 0; i < (path.size() - 1); i++) {
+            double startX = vertexCoordinates.get(path.get(i)).getX();
+            double startY = vertexCoordinates.get(path.get(i)).getY();
+            double finishX = vertexCoordinates.get(path.get(i + 1)).getX();
+            double finishY = vertexCoordinates.get(path.get(i + 1)).getY();
+            gc.strokeLine(startX, startY, finishX, finishY);
+        }
     }
 
     /**
