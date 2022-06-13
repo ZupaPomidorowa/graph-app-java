@@ -41,7 +41,7 @@ public class Vertex {
     public final static int LOWER = 3;
 
     /**
-     * Creates an empty vertex of a given index.
+     * Creates an empty vertex.
      */
     public Vertex() {
         Arrays.fill(neighbour, -1);
@@ -109,6 +109,10 @@ public class Vertex {
         return weight[position];
     }
 
+    /**
+     * Describes a vertex in the format: "neighbourIndex1 :edgeWeight1 ... neighbourIndexN :edgeWeightN".
+     * @return string with the vertex description
+     */
     @Override
     public String toString() {
         String str = "";

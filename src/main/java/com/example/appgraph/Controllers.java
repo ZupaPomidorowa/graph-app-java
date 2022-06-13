@@ -28,109 +28,137 @@ public class Controllers implements Initializable {
      */
     @FXML
     private ScrollPane scrollPane = new ScrollPane();
+
     /**
      * Text field for the lower end of the weight range.
      */
     @FXML
     private TextField weightLowerField;
+
     /**
      * Text field for the upper end of the weight range.
      */
     @FXML
     private TextField weightUpperField;
+
     /**
      * Text field for the number of rows.
      */
     @FXML
     private TextField rowsField;
+
     /**
      * Text field for the number of columns.
      */
     @FXML
     private TextField columnsField;
+
     /**
      * Text field for the number of segments.
      */
     @FXML
     private TextField segmentsField;
+
     /**
      * Button for saving the graph file.
      */
     @FXML
     private Button saveFile;
+
     /**
      * Button for checking the connectivity of a graph.
      */
     @FXML
     private Button checkConnectivity;
+
     /**
      * Label describing if graph is connected or disconnected.
      */
     @FXML
     private Label connectivityLabel;
+
     /**
      * Label for the lower end of the weight range.
      */
     @FXML
     private Label weightLowerLabel;
+
     /**
      * Label for the upper end of the weight range.
      */
     @FXML
     private Label weightUpperLabel;
+
     /**
      * Graph generated at runtime.
      */
     GeneratedGraph gg;
+
     /**
      * Graph read from a file.
      */
     ReadGraph rg;
+
     /**
      * File choosing window.
      */
     FileChooser fileChooser = new FileChooser();
+
     /**
      * Canvas in the ScrollPane on which the graph is drawn.
      */
     Canvas canvas;
+
     /**
      * GraphicContext for drawing on the canvas.
      */
     GraphicsContext gc;
+
     /**
      * Map of vertex coordinates on the canvas.
      */
     Map<Integer, Point2D> vertexCoordinates = new HashMap<>();
 
+    /**
+     * Index of a vertex from which the path begins.
+     */
     int startVertex;
 
+    /**
+     * Index of a vertex to which the path leads.
+     */
     int finishVertex;
 
     /**
      * List of clicked nodes.
      */
     ArrayList<Point2D> clickedNodes = new ArrayList<>(2); // to be changed?
+
     /**
      * Dark blue hue (lower end of the weight range).
      */
     private static final double BLUE = Color.DARKBLUE.getHue();
+
     /**
      * Red hue (upper end of the weight range).
      */
     private static final double RED = Color.RED.getHue();
+
     /**
      * Vertex graphical representation diameter.
      */
     private static final int POINT_SIZE = 20;
+
     /**
      * Edge graphical representation length.
      */
     private static final int EDGE_LENGTH = 20;
+
     /**
      * Edge graphical representation width.
      */
     private static final int EDGE_THICKNESS = 5;
+
     /**
      * Margin on the canvas.
      */
@@ -157,18 +185,17 @@ public class Controllers implements Initializable {
             gg = new Graph(rows, columns, w1, w2);
             gg.generateGraph();
 
-            //test - printing rows, columns, w1, w2
-            System.out.println("Rows " + rows);
-            System.out.println("Columns " + columns);
-            System.out.println("w1 " + w1);
-            System.out.println("w2 " + w2);
+            System.out.println("Rows = " + rows);
+            System.out.println("Columns = " + columns);
+            System.out.println("w1 = " + w1);
+            System.out.println("w2 = " + w2);
 
             gg.printGraph();
 
             updateWeightLabels((Graph) gg);
 
-            //splitting graph
-            if (segments > 1) {
+            // splitting the graph
+            for(int i = 1; i < segments; i++) {
                 gg.splitGraph();
             }
 
@@ -209,7 +236,6 @@ public class Controllers implements Initializable {
         try {
             FileReader reader = new FileReader(selectedFile.getAbsolutePath());
             rg.readGraph(reader);
-            //test - printing imported graph
             rg.printGraph();
             updateWeightLabels((Graph) rg);
             drawGraph((Graph) rg);
@@ -238,25 +264,20 @@ public class Controllers implements Initializable {
      */
     @FXML
     void checkConnectivity() {
-        // NOT THE BEST SOLUTION - TO BE CHANGED!
-        if (gg != null) {
-            Connectivity bfs = new Connectivity((Graph) gg);
-            if (bfs.isConnected((Graph) gg)) {
-                connectivityLabel.setText("The graph is connected.");
-                System.out.println("The graph is connected.");
-            } else {
-                connectivityLabel.setText("The graph is disconnected.");
-                System.out.println("The graph is disconnected.");
-            }
+        Graph checked;
+        if(gg != null) {
+            checked = (Graph)gg;
         } else {
-            Connectivity bfs = new Connectivity((Graph) rg);
-            if (bfs.isConnected((Graph) rg)) {
-                connectivityLabel.setText("The graph is connected.");
-                System.out.println("The graph is connected.");
-            } else {
-                connectivityLabel.setText("The graph is disconnected.");
-                System.out.println("The graph is disconnected.");
-            }
+            checked = (Graph)rg;
+        }
+
+        Connectivity bfs = new Connectivity(checked);
+        if (bfs.isConnected(checked)) {
+            connectivityLabel.setText("The graph is connected.");
+            System.out.println("The graph is connected.");
+        } else {
+            connectivityLabel.setText("The graph is disconnected.");
+            System.out.println("The graph is disconnected.");
         }
     }
 
@@ -269,13 +290,11 @@ public class Controllers implements Initializable {
     public void saveGraph() throws FileNotFoundException, UnsupportedEncodingException {
         File selectedFile = fileChooser.showSaveDialog(null);
 
-        //test - print path to file
         System.out.println(selectedFile.getAbsolutePath());
 
         String value = selectedFile.getAbsolutePath();
         PrintWriter writer = new PrintWriter(value, "UTF-8");
             gg.writeGraph(writer);
-            //test - print graph wrote to the file
             gg.printGraph();
     }
 
@@ -284,12 +303,14 @@ public class Controllers implements Initializable {
      * @param g generated graph or graph read from a file
      */
     public void drawGraph(Graph g) {
-        canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING, g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
+        // clear canvas
+        canvas = new Canvas(g.getColumns() * (POINT_SIZE + EDGE_LENGTH) + PADDING,
+                g.getRows() * (POINT_SIZE + EDGE_LENGTH) + PADDING);
         scrollPane.setContent(canvas);
         gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-        //draw nodes
+        // draw nodes
         gc.setFill(Color.BLACK);
         for (int i = 0; i < g.getRows(); i++) {
             for (int j = 0; j < g.getColumns(); j++) {
@@ -304,7 +325,7 @@ public class Controllers implements Initializable {
             }
         }
 
-        //draw edges horizontal
+        // draw horizontal edges
         for (int i = 0; i < g.getRows(); i++) {
             for (int j = 0; j < (g.getColumns() - 1); j++) {
                 int vertexIndex = i * g.getColumns() + j;
@@ -318,7 +339,7 @@ public class Controllers implements Initializable {
             }
         }
 
-        //draw edges vertical
+        // draw vertical edges
         for (int i = 0; i < (g.getRows() - 1); i++) {
             for (int j = 0; j < g.getColumns(); j++) {
                 int vertexIndex = i * g.getColumns() + j;
@@ -334,12 +355,12 @@ public class Controllers implements Initializable {
 
         // enable vertex selection for shortest path finding
         canvas.setOnMouseClicked(event -> {
-            // TO BE CHANGED!
             double mouseX = event.getX();
             double mouseY = event.getY();
             Point2D mousePoint = new Point2D(mouseX, mouseY);
 
             if (clickedNodes.size() == 0) {
+                // 1st click
                 for (int i = 0; i < g.getGraphSize(); i++) {
                     Point2D vertexCenterPoint = vertexCoordinates.get(i);
                     startVertex = i;
@@ -354,11 +375,13 @@ public class Controllers implements Initializable {
                     }
                 }
             } else if (clickedNodes.size() == 1) {
+                // 2nd click
                 for (int i = 0; i < g.getGraphSize(); i++) {
                     Point2D vertexCenterPoint = vertexCoordinates.get(i);
                     finishVertex = i;
                     if (pointDistance(mousePoint, vertexCenterPoint) <= (POINT_SIZE / 2)) {
                         if(clickedNodes.contains(vertexCenterPoint)) {
+                            // the same vertex clicked twice
                             gc.setFill(BLACK);
                             gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
                                     (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
@@ -368,6 +391,7 @@ public class Controllers implements Initializable {
                             drawGraph(g);
                             break;
                         } else {
+                            // 2nd vertex different from the 1st one
                             gc.setFill(FUCHSIA);
                             gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
                                     (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
@@ -380,11 +404,13 @@ public class Controllers implements Initializable {
                     }
                 }
             } else if (clickedNodes.size() == 2) {
+                // 3rd click
                 for (int i = 0; i < g.getGraphSize(); i++) {
                     Point2D vertexCenterPoint = vertexCoordinates.get(i);
                     startVertex = i;
                     if (pointDistance(mousePoint, vertexCenterPoint) <= (POINT_SIZE / 2)) {
                         if (clickedNodes.contains(vertexCenterPoint)) {
+                            // the same vertex clicked twice
                             gc.setFill(BLACK);
                             gc.fillOval((vertexCenterPoint.getX() - (POINT_SIZE / 2)),
                                     (vertexCenterPoint.getY() - (POINT_SIZE / 2)),
@@ -400,6 +426,7 @@ public class Controllers implements Initializable {
                             drawGraph(g);
                             break;
                         } else {
+                            // 3rd vertex different from the 1st and 2nd one
                             gc.setFill(BLACK);
                             gc.fillOval((clickedNodes.get(0).getX() - (POINT_SIZE / 2)),
                                     (clickedNodes.get(0).getY() - (POINT_SIZE / 2)),
@@ -420,11 +447,8 @@ public class Controllers implements Initializable {
                                     POINT_SIZE);
                             break;
                         }
-
                     }
-
                 }
-
             }
         });
     }
@@ -440,6 +464,12 @@ public class Controllers implements Initializable {
         return Color.hsb(hue, 1.0, 1.0);
     }
 
+    /**
+     * Calculates the Euclidean distance between 2 points.
+     * @param p1 first point
+     * @param p2 second point
+     * @return distance between the 2 points
+     */
     private double pointDistance(Point2D p1, Point2D p2) {
         double x1 = p1.getX();
         double y1 = p1.getY();
@@ -449,6 +479,10 @@ public class Controllers implements Initializable {
         return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
     }
 
+    /**
+     * Draws the shortest path between 2 vertices on the canvas.
+     * @param g graph containing the 2 points
+     */
     private void drawPath(Graph g) {
         Path dijkstry = new Path(g);
         ArrayList<Integer> path = dijkstry.findPath(g, startVertex, finishVertex);

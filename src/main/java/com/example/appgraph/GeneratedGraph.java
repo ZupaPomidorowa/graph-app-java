@@ -49,7 +49,7 @@ public interface GeneratedGraph {
     void generateGraph();
 
     /**
-     * Splits a connected graph into 2 disconnected segments.
+     * Splits a connected graph into disconnected segments.
      */
     void splitGraph();
 

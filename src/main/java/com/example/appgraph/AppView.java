@@ -23,11 +23,7 @@ public class AppView extends Application {
         stage.setScene(scene);
         stage.setResizable(false);
 
-        //Controllers test = new Controllers();
-
         stage.show();
-
-
     }
 
     /**
@@ -36,6 +32,5 @@ public class AppView extends Application {
      */
     public static void main(String[] args) {
         launch();
-
     }
 }

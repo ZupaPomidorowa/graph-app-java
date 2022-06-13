@@ -189,7 +189,8 @@ public class Path {
      * @param g graph
      * @param startVertex vertex from which the path starts
      * @param finishVertex vertex to which the path leads
-     * @return ArrayList with the path saved (finish vertex as the 0th element, start vertex as the last element)
+     * @return ArrayList with the path saved (finish vertex as the 0th element, start vertex as the last element),
+     * null if the path doesn't exist
      */
     public ArrayList<Integer> findPath(Graph g, int startVertex, int finishVertex) {
         dijkstry(g, startVertex);

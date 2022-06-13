@@ -205,7 +205,7 @@ public class Graph implements GeneratedGraph, ReadGraph {
     }
 
     /**
-     * Splits a connected graph into 2 disconnected segments.
+     * Splits a connected graph into disconnected segments.
      */
     @Override
     public void splitGraph() {
@@ -248,31 +248,6 @@ public class Graph implements GeneratedGraph, ReadGraph {
                 v[currentVertex + columns].removeNeighbour(0);
             }
         }
-
-        // maybe delete this?
-        // for all vertices that became entirely disconnected, restore 1 possible edge
-        /*double w = 0;
-        for(int i = 0; i < getGraphSize(); i++) {
-            if(v[i].countNeighbours() == 0) {
-                if(getCurrentRow(i) != 0) {
-                    w = getRandomWeight();
-                    v[i].setNeighbour(Vertex.UPPER, (i - columns), w);
-                    v[i - columns].setNeighbour(Vertex.LOWER, i, w);
-                } else if(getCurrentColumn(i) != 0) {
-                    w = getRandomWeight();
-                    v[i].setNeighbour(Vertex.LEFT, (i - 1), w);
-                    v[i - 1].setNeighbour(Vertex.RIGHT, i, w);
-                } else if(getCurrentColumn(i) != (columns - 1)) {
-                    w = getRandomWeight();
-                    v[i].setNeighbour(Vertex.RIGHT, (i + 1), w);
-                    v[i + 1].setNeighbour(Vertex.LEFT, i, w);
-                }
-                else if(getCurrentRow(i) != (rows - 1)) {
-                    v[i].setNeighbour(Vertex.LOWER, (i + columns), w);
-                    v[i + columns].setNeighbour(Vertex.UPPER, i, w);
-                }
-            }
-        }*/
     }
 
     /**
